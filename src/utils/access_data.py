@@ -76,7 +76,7 @@ class DataStorage:
 
             result.update(
                 {
-                    "age": (datetime.now(tz=config.tzinfo) - birthday).days // 365,
+                    "age": (datetime.now() - birthday).days // 365,
                     "birthday": profile_info["birthday"],
                     "nickname": profile_info["nickname"],
                     "email": profile_info["email"],
