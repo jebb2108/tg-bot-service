@@ -3,6 +3,7 @@ from datetime import datetime, time
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
+from src.config import config
 from src.dependencies import get_gateway
 from src.exc import StorageDataException
 
@@ -69,12 +70,13 @@ class DataStorage:
 
         if profile_info and not profile_info.get('error', False):
             birthday = profile_info["birthday"]
-            if not isinstance(birthday, datetime):
-                birthday = datetime.combine(birthday, time.min)
+
+            if isinstance(birthday, str):
+                birthday = datetime.fromisoformat(birthday)
 
             result.update(
                 {
-                    "age": (datetime.now() - birthday).days // 365,
+                    "age": (datetime.now(tz=config.tzinfo) - birthday).days // 365,
                     "birthday": profile_info["birthday"],
                     "nickname": profile_info["nickname"],
                     "email": profile_info["email"],
