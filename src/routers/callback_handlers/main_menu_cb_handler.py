@@ -26,7 +26,7 @@ logger = log.setup_logger("main_menu_cb_handler")
 router = Router(name=__name__)
 
 
-@router.callback_query(and_f(F.data == "start_main_page", approved))
+@router.callback_query(and_f(F.data == "start_main_page", approved)) # noqa
 async def start_main_page_handler(callback: CallbackQuery, state: FSMContext):
     """
     Возвращает пользователя назад в главное меню, создавая новое сообщение
@@ -46,7 +46,7 @@ async def start_main_page_handler(callback: CallbackQuery, state: FSMContext):
         else:
             msg += MESSAGES["get_to_know"][lang_code]
 
-        image_from_file = FSInputFile(config.ABS_PATH_TO_IMG_ONE)
+        image_from_file = FSInputFile(config.bot.abs_img_path)
         await callback.message.answer_photo(
             photo=image_from_file,
             caption=msg,
@@ -59,7 +59,7 @@ async def start_main_page_handler(callback: CallbackQuery, state: FSMContext):
         return await callback.message.answer("You`re not registered. Press /start to do so")
 
     except Exception as e:
-        return logger.error(f"Error in go_back handler: {e}")
+        return logger.error(f"Error in start_main_page_handler: {e}")
 
 
 @router.callback_query(F.data == "go_back")
@@ -98,9 +98,7 @@ async def go_back_handler(callback: CallbackQuery, state: FSMContext):
 
 
 
-@router.callback_query(
-    and_f(F.data == "about", approved)
-)
+@router.callback_query(and_f(F.data == "about", approved)) # noqa
 async def about(callback: CallbackQuery, state: FSMContext):
     """
     Обработчик нажатия кнопки "О боте".
@@ -174,41 +172,6 @@ async def profile_handler(callback: CallbackQuery, state: FSMContext):
         logger.error(f"Error in profile_handler: {e}")
 
 
-@router.callback_query(F.data == "go_back")
-async def go_back_handler(callback: CallbackQuery, state: FSMContext):
-    """
-    Возвращает пользователя назад в главное меню, повторно вызывая те же кнопки.
-    """
-    await callback.answer()
-    await state.set_state(MultiSelection.ended_change)
-
-    user_id = callback.from_user.id
-
-    try:
-        data = await ds.get_storage_data(user_id, state)
-        lang_code = data.get("lang_code")
-
-        msg = f"{MESSAGES['welcome'][lang_code]}"
-
-        if not data.get('nickname', False):
-            msg += MESSAGES["get_to_know"][lang_code]
-        else:
-            msg += MESSAGES["pin_me"][lang_code]
-
-        await callback.message.edit_caption(
-            caption=msg,
-            reply_markup=get_on_main_menu_keyboard(lang_code),
-            parse_mode=ParseMode.HTML,
-        )
-
-    except StorageDataException:
-        logger.error(f"User {user_id} trying to acces data, but doesn`t exist in DB")
-        return await callback.message.answer("You`re not registered. Press /start to do so")
-
-    except Exception as e:
-        return logger.error(f"Error in go_back handler: {e}")
-
-
 @router.callback_query(and_f(F.data.startswith("shop:"), approved))
 async def shop_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
@@ -242,7 +205,6 @@ async def manage_subscription_handler(callback: CallbackQuery, state: FSMContext
     if await approved(callback, state):
 
         # После обновления Storage, делаю проверку на статус
-        gateway = await get_gateway()
         data = await ds.get_storage_data(user_id, state)
         lang_code = data.get("lang_code")
         is_active = data.get("is_active")
@@ -282,8 +244,8 @@ async def cancel_subscription_handler(callback: CallbackQuery, state: FSMContext
     user_id = callback.from_user.id
 
     gateway = await get_gateway()
-    async with gateway() as session:
-        await session.post('deactivate_subscription', user_id)
+    async with gateway:
+        await gateway.post('deactivate_subscription', user_id)
 
     await state.clear()
 
@@ -325,8 +287,8 @@ async def resume_subscription_handler(callback: CallbackQuery, state: FSMContext
 
     user_id = callback.from_user.id
     gateway = await get_gateway()
-    async with gateway() as session:
-        resp: "ClientResponse" = await session.post('activate_subscription', user_id)
+    async with gateway:
+        resp: "ClientResponse" = await gateway.post('activate_subscription', user_id)
         if resp.status != 200: raise aiohttp.client_exceptions.ClientError
 
     await state.clear()

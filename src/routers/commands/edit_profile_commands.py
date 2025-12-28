@@ -99,10 +99,11 @@ async def edit_intro_handler(message: Message, state: FSMContext):
 
         gateway = await get_gateway()
         new_profile = Profile(
-            user_id=data.get('user_id'),
+            user_id=user_id,
             nickname=data.get('nickname'),
             email=data.get('email'),
             gender=data.get('gender'),
+            birthday=data.get('birthday'),
             dating=data.get('dating'),
             status=data.get('status'),
             intro=new_intro
