@@ -69,11 +69,10 @@ async def edit_nickname_handler(message: Message, state: FSMContext) -> None:
         )
 
         async with gateway:
-            resp: "ClientResponse" = await gateway.put(
+            await gateway.put(
                 'update_profile',
                 new_profile
             )
-            if resp.status != 200: raise aiohttp.client_exceptions.ClientError
 
         return await state.set_state(MultiSelection.ended_change)
 
@@ -109,11 +108,10 @@ async def edit_intro_handler(message: Message, state: FSMContext):
             birthday=data.get('birthday')
         )
         async with gateway:
-            resp: "ClientResponse" = await gateway.put(
-                'update_profile', new_profile
-
+            await gateway.put(
+                'update_profile',
+                new_profile
             )
-            if resp.status != 200: raise aiohttp.client_exceptions.ClientError
 
         return await state.set_state(MultiSelection.ended_change)
 
