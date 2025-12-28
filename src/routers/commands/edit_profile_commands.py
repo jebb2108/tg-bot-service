@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import aiohttp.client_exceptions
 from aiogram import Router
 from aiogram.enums import ParseMode
@@ -100,13 +102,15 @@ async def edit_intro_handler(message: Message, state: FSMContext):
         gateway = await get_gateway()
         new_profile = Profile(
             user_id=user_id,
+            intro=new_intro,
             nickname=data.get('nickname'),
             email=data.get('email'),
             gender=data.get('gender'),
-            birthday=data.get('birthday'),
             dating=data.get('dating'),
             status=data.get('status'),
-            intro=new_intro
+            birthday=datetime.isoformat(
+                data.get('birthday').date()
+            )
         )
         async with gateway:
             resp: "ClientResponse" = await gateway.put(
