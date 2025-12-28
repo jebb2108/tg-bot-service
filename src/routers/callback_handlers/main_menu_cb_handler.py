@@ -148,7 +148,7 @@ async def profile_handler(callback: CallbackQuery, state: FSMContext):
 
 
         nickname = data.get("nickname", callback.from_user.username)
-        sidebar = "=" * (17 - len(nickname))
+        sidebar = "=" * (15 - len(nickname))
         formated_nickname = sidebar + " " + nickname + " " + sidebar
         topics = [TRANSCRIPTIONS["topics"][topic][lang_code] for topic in data.get("topics").split(", ")]
         msg = MESSAGES["user_info"][lang_code].format(
@@ -157,7 +157,7 @@ async def profile_handler(callback: CallbackQuery, state: FSMContext):
             fluency=TRANSCRIPTIONS["fluency"][data.get("fluency")][lang_code],
             topic=", ".join(topics),
             language=TRANSCRIPTIONS["languages"][data.get("language")][lang_code],
-            about=data.get("about", 'not specified'),
+            about=data.get("intro", 'not specified'),
         )
 
         await callback.message.edit_caption(
