@@ -1,10 +1,8 @@
-import aiohttp.client_exceptions
 from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import and_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from aiohttp import ClientResponse
 
 from src.dependencies import get_gateway
 from src.exc import AlreadyExistsError, TooShortError, TooLongError, InvalidCharactersError, EmptySpaceError, \

@@ -1,9 +1,7 @@
 import re
-
-import aiohttp.client_exceptions
-import emoji
 from typing import Union
 
+import emoji
 from aiohttp import ClientResponse
 
 from src.dependencies import get_gateway
@@ -14,15 +12,12 @@ from src.exc import (
 )
 
 
-
-
 async def validate_name(nickname: str) -> Union[True, Exception]:
     string_pattern = r"^(?=.*[a-zA-Z]{1,})(?=.*[\d]{0,})[a-zA-Z0-9]{1,15}$"
 
     gateway = await get_gateway()
     async with gateway:
         resp: "ClientResponse" = await gateway.get('nickname_exists', nickname)
-        if resp.status != 200: raise aiohttp.client_exceptions.ClientError
         data: dict = resp.json() # noqa
         if not data.get('exists'): raise AlreadyExistsError
 
