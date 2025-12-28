@@ -99,7 +99,7 @@ async def edit_intro_handler(message: Message, state: FSMContext):
 
         gateway = await get_gateway()
         async with gateway:
-            resp: "ClientResponse" = await gateway.post(
+            resp: "ClientResponse" = await gateway.put(
                 'update_profile',
                 user_id, new_intro,
                 target='intro'
