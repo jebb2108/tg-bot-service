@@ -1,12 +1,10 @@
-import json
+from typing import Optional, Union
 
 import httpx
-from typing import Any, Optional, Union
 
 from src.config import config
-from src.models import User, Profile
-
 from src.logconf import opt_logger as log
+from src.models import User, Profile
 
 logger = log.setup_logger('gateway service')
 
