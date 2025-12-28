@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import aiohttp.client_exceptions
 from aiogram import Router
 from aiogram.enums import ParseMode
@@ -8,18 +6,18 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiohttp import ClientResponse
 
+from src.dependencies import get_gateway
+from src.exc import AlreadyExistsError, TooShortError, TooLongError, InvalidCharactersError, EmptySpaceError, \
+    EmojiesNotAllowed
 from src.filters.approved import approved
 from src.keyboards.inline_keyboards import get_menu_keyboard
-from src.models import User, Profile
+from src.logconf import opt_logger as log
+from src.models import Profile
 from src.translations import MESSAGES
 from src.utils.access_data import MultiSelection
 from src.utils.access_data import data_storage as ds
 from src.utils.exc_handler import nickname_exception_handler, intro_exception_handler
 from src.validators.validators import validate_name, validate_intro
-from src.exc import AlreadyExistsError, TooShortError, TooLongError, InvalidCharactersError, EmptySpaceError, \
-    EmojiesNotAllowed
-from src.logconf import opt_logger as log
-from src.dependencies import get_gateway
 
 router = Router(name=__name__)
 logger = log.setup_logger("edit_profile_commands")
@@ -108,9 +106,7 @@ async def edit_intro_handler(message: Message, state: FSMContext):
             gender=data.get('gender'),
             dating=data.get('dating'),
             status=data.get('status'),
-            birthday=datetime.isoformat(
-                data.get('birthday').date()
-            )
+            birthday=data.get('birthday')
         )
         async with gateway:
             resp: "ClientResponse" = await gateway.put(

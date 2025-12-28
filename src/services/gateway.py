@@ -102,7 +102,7 @@ class GatewayService:
         response = await self.session.put(
             url=url,
             headers={'content-type': 'application/json'},
-            json=new_data.model_dump(),
+            content=new_data.model_dump_json(),
             timeout=10.0
         )
         response.raise_for_status()
