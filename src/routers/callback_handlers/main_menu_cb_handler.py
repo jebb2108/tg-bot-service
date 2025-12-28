@@ -36,20 +36,15 @@ async def start_main_page_handler(callback: CallbackQuery, state: FSMContext):
 
     user_id = callback.from_user.id
 
-    gateway = await get_gateway()
-    async with gateway() as session:
-        profile_exists = await session.get('profile_exists', user_id)
-
     try:
         data = await ds.get_storage_data(user_id, state)
         lang_code = data.get("lang_code")
 
         msg = f"{MESSAGES['welcome'][lang_code]}"
-
-        if not profile_exists:
-            msg += MESSAGES["get_to_know"][lang_code]
-        else:
+        if data.get("nickname", False):
             msg += MESSAGES["pin_me"][lang_code]
+        else:
+            msg += MESSAGES["get_to_know"][lang_code]
 
         image_from_file = FSInputFile(config.ABS_PATH_TO_IMG_ONE)
         await callback.message.answer_photo(
