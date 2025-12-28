@@ -2,7 +2,7 @@ from aiogram.enums import ParseMode
 from aiogram.types import Message
 
 from src.translations import ERROR_MESSAGES
-from exc import (
+from src.exc import (
     EmptySpaceError, EmojiesNotAllowed,
     AlreadyExistsError,  TooShortError,
     TooLongError, InvalidCharactersError
