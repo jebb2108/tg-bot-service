@@ -98,11 +98,6 @@ class GatewayService:
     # PUT функции
     async def _put_update_profile(self, new_data: Union[User, Profile]):
 
-        if isinstance(new_data, User):
-            target = 'users'
-        else:
-            target = 'profiles'
-
         url = f'{self.gateway_url}/api/update_profile'
         response = await self.session.put(
             url=url,

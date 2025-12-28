@@ -60,12 +60,12 @@ async def edit_nickname_handler(message: Message, state: FSMContext) -> None:
         new_profile = Profile(
             user_id=user_id,
             nickname=new_nickname,
-            email=user_data.get('email', None),
-            gender=user_data.get('gender', None),
-            intro=user_data.get('intro', None),
-            birthday=user_data.get('birthday', None),
-            dating=user_data.get('dating', None),
-            status=user_data.get('status', None),
+            email=user_data.get('email'),
+            gender=user_data.get('gender'),
+            intro=user_data.get('intro'),
+            birthday=user_data.get('birthday'),
+            dating=user_data.get('dating'),
+            status=user_data.get('status'),
         )
 
         async with gateway:
@@ -98,11 +98,19 @@ async def edit_intro_handler(message: Message, state: FSMContext):
         )
 
         gateway = await get_gateway()
+        new_profile = Profile(
+            user_id=data.get('user_id'),
+            nickname=data.get('nickname'),
+            email=data.get('email'),
+            gender=data.get('gender'),
+            dating=data.get('dating'),
+            status=data.get('status'),
+            intro=new_intro
+        )
         async with gateway:
             resp: "ClientResponse" = await gateway.put(
-                'update_profile',
-                user_id, new_intro,
-                target='intro'
+                'update_profile', new_profile
+
             )
             if resp.status != 200: raise aiohttp.client_exceptions.ClientError
 
