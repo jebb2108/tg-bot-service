@@ -146,7 +146,8 @@ async def profile_handler(callback: CallbackQuery, state: FSMContext):
         nickname = data.get("nickname", callback.from_user.username)
         sidebar = "=" * (15 - len(nickname))
         formated_nickname = sidebar + " " + nickname + " " + sidebar
-        topics = [TRANSCRIPTIONS["topics"][topic][lang_code] for topic in data.get("topics").split(", ")]
+        topics = data.get("topics").split(", ") if len(data.get("topics")) > 1 else data.get("topics")
+        topics = [TRANSCRIPTIONS["topics"][topic][lang_code] for topic in topics]
         msg = MESSAGES["user_info"][lang_code].format(
             nickname=formated_nickname,
             age=data.get("age", 'not specified'),
