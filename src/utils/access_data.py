@@ -54,6 +54,9 @@ class DataStorage:
             user_info = await gateway.get(
                 'user_data', user_id, target='users'
             )
+            # Если аккаунт еще не создан - выход
+            if not user_info: return {}
+
             # Платежные данные о пользователе
             payment_info = await gateway.get(
                 'payment_data', user_id
@@ -62,9 +65,6 @@ class DataStorage:
             profile_info = await gateway.get(
                 'user_data', user_id, target='profiles'
             )
-
-        if not user_info:
-            return {}
 
         result = {
             "user_id": user_id,

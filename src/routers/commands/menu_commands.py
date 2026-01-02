@@ -1,5 +1,3 @@
-from typing import TYPE_CHECKING
-
 from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, and_f
@@ -25,7 +23,7 @@ router = Router(name=__name__)
 
 
 @router.message(
-    and_f(Command("menu", prefix="!/"))
+    and_f(Command("menu", prefix="!/"), approved)
 )
 async def show_main_menu(message: Message, state: FSMContext, rate_limit_info: RateLimitInfo):
 
