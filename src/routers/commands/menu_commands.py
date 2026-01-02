@@ -25,7 +25,7 @@ router = Router(name=__name__)
 
 
 @router.message(
-    and_f(Command("menu", prefix="!/"), approved)
+    and_f(Command("menu", prefix="!/"))
 )
 async def show_main_menu(message: Message, state: FSMContext, rate_limit_info: RateLimitInfo):
 

@@ -5,7 +5,7 @@ from aiogram.fsm.state import StatesGroup, State
 
 from src.dependencies import get_gateway
 from src.exc import StorageDataException
-from src.utils.timer import get_current_naive_str
+from src.utils.timer import get_current_naive_str, get_current_datetime
 
 
 class MultiSelection(StatesGroup):
@@ -43,14 +43,25 @@ class DataStorage:
 
     @staticmethod
     async def set_user_info(user_id: int) -> dict:
-        """Гарантирует, что машина состояние имеет все данные о пользователе"""
-
+        """
+        Гарантирует, что машина состояния
+        имеет все данные о пользователе
+        """
         gateway = await get_gateway()
+        # Отправляем запрос в БД на получение информации
         async with gateway:
-            user_info = await gateway.get('user_data', user_id, target='users')
-            profile_info = await gateway.get('user_data', user_id, target='profiles')
-            payment_info = await gateway.get('payment_data', user_id)
-
+            # Базовая информация о пользователе
+            user_info = await gateway.get(
+                'user_data', user_id, target='users'
+            )
+            # Платежные данные о пользователе
+            payment_info = await gateway.get(
+                'payment_data', user_id
+            )
+            # Доп. регистрация о пользователе
+            profile_info = await gateway.get(
+                'user_data', user_id, target='profiles'
+            )
 
         if not user_info:
             return {}
@@ -74,16 +85,17 @@ class DataStorage:
             if isinstance(birthday, str):
                 birthday = datetime.fromisoformat(birthday)
 
+
             result.update(
                 {
-                    "age": (datetime.now() - birthday).days // 365,
                     "birthday": profile_info["birthday"],
                     "nickname": profile_info["nickname"],
                     "email": profile_info["email"],
                     "gender": profile_info["gender"],
                     "dating": profile_info["dating"],
                     "intro": profile_info['intro'],
-                    "status": profile_info["status"]
+                    "status": profile_info["status"],
+                    "age": (get_current_datetime()-birthday).days//365
                 }
             )
 
