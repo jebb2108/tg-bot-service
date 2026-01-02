@@ -1,11 +1,11 @@
-from datetime import datetime, time
+from datetime import datetime
 
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
-from src.config import config
 from src.dependencies import get_gateway
 from src.exc import StorageDataException
+from src.utils.timer import get_current_naive_str
 
 
 class MultiSelection(StatesGroup):
@@ -16,13 +16,15 @@ class MultiSelection(StatesGroup):
     waiting_intro = State()
     ended_change = State()
 
-
 class DataStorage:
 
     async def get_storage_data(
-        self, user_id: int, state: FSMContext
+        self, user_id: int, state: FSMContext, renew: bool = False
     ) -> dict:
         """Достаем нужные данные о пользователе"""
+
+        # При renew = True обновляет данные
+        if renew: await state.clear()
 
         s_data = await state.get_data()
 
@@ -47,13 +49,14 @@ class DataStorage:
         async with gateway:
             user_data = await gateway.get('user_data', user_id, target='users')
             profile_data = await gateway.get('user_data', user_id, target='profiles')
+            payment_data = await gateway.get('payment_data', user_id)
 
         user_info = user_data.json()
         profile_info = profile_data.json()
+        payment_info = payment_data.json()
 
         if not user_info:
             return {}
-
 
         result = {
             "user_id": user_id,
@@ -64,8 +67,8 @@ class DataStorage:
             "topics": ', '.join(user_info["topics"]),
             "camefrom": user_info["camefrom"],
             "lang_code": user_info["lang_code"],
-            "is_active": user_info["is_active"],
-            "due_to": user_info.get('due_to', None)
+            "is_active": payment_info.get("is_active", False),
+            "due_to": payment_info.get("until", lambda: get_current_naive_str)
         }
 
         if profile_info and not profile_info.get('error', False):
@@ -88,6 +91,7 @@ class DataStorage:
             )
 
         return result
+
 
 
 

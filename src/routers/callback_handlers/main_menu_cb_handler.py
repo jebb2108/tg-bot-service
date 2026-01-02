@@ -1,10 +1,8 @@
-import aiohttp.client_exceptions
 from aiogram import F, Router
 from aiogram.enums import ParseMode
 from aiogram.filters import and_f
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile
-from aiohttp import ClientResponse
 
 from src.config import config
 from src.dependencies import get_gateway
@@ -252,24 +250,15 @@ async def cancel_subscription_handler(callback: CallbackQuery, state: FSMContext
     user_id = callback.from_user.id
     data = await ds.get_storage_data(user_id, state)
     lang_code = data.get("lang_code")
-    due_to = data.get('due_to')
-    is_active = False
 
     if await approved(callback):
-        if is_active:
-            cap = MESSAGES["active_sub_caption"][lang_code].format(date=due_to.split('T')[0])
-            await callback.message.edit_caption(
-                caption=cap,
-                reply_markup=get_subscription_keyboard(lang_code, True),
-                parse_mode=ParseMode.HTML
-            )
-        else:
-            cap = MESSAGES["resume_sub_caption"][lang_code]
-            await callback.message.edit_caption(
-                caption=cap,
-                reply_markup=get_subscription_keyboard(lang_code, False, True),
-                parse_mode=ParseMode.HTML
-            )
+
+        cap = MESSAGES["resume_sub_caption"][lang_code]
+        await callback.message.edit_caption(
+            caption=cap,
+            reply_markup=get_subscription_keyboard(lang_code, False, True),
+            parse_mode=ParseMode.HTML
+        )
 
     else:
         cap = MESSAGES["expired_sub_caption"][lang_code]
@@ -284,42 +273,37 @@ async def cancel_subscription_handler(callback: CallbackQuery, state: FSMContext
 async def resume_subscription_handler(callback: CallbackQuery, state: FSMContext):
 
     await callback.answer("Subscription resumed")
-
     user_id = callback.from_user.id
-    gateway = await get_gateway()
-    async with gateway:
-        resp: "ClientResponse" = await gateway.post('activate_subscription', user_id)
-        if resp.status != 200: raise aiohttp.client_exceptions.ClientError
 
-    await state.clear()
+    try:
+        # Отправляет запрос на микросервис оплаты
+        gateway = await get_gateway()
+        async with gateway:
+            await gateway.post('activate_subscription', user_id)
 
-    user_id = callback.from_user.id
-    data = await ds.get_storage_data(user_id, state)
-    lang_code = data.get("lang_code")
-    due_to = data.get('due_to')
-    is_active = True
 
-    if await approved(callback):
-        if is_active:
+        user_id = callback.from_user.id
+        data = await ds.get_storage_data(user_id, state, True)
+        lang_code = data.get("lang_code")
+        due_to = data.get('due_to')
+
+        if await approved(callback):
             cap = MESSAGES["active_sub_caption"][lang_code].format(date=due_to.split('T')[0])
             await callback.message.edit_caption(
                 caption=cap,
                 reply_markup=get_subscription_keyboard(lang_code, True),
                 parse_mode=ParseMode.HTML
             )
+
         else:
-            cap = MESSAGES["resume_sub_caption"][lang_code]
+            cap = MESSAGES["expired_sub_caption"][lang_code]
             await callback.message.edit_caption(
                 caption=cap,
-                reply_markup=get_subscription_keyboard(lang_code, False, True),
+                reply_markup=get_subscription_keyboard(lang_code, False),
                 parse_mode=ParseMode.HTML
             )
-    else:
-        cap = MESSAGES["expired_sub_caption"][lang_code]
-        await callback.message.edit_caption(
-            caption=cap,
-            reply_markup=get_subscription_keyboard(lang_code, False),
-            parse_mode=ParseMode.HTML
-        )
+
+    except Exception as e:
+        logger.error(f"Error in resume_subscription_handler: {e}")
 
 

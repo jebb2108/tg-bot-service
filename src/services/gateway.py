@@ -56,24 +56,39 @@ class GatewayService:
     async def _get_check_user_exists(self, user_id: int):
         """ Проверка существования пользователя """
         url = f'{self.gateway_url}/api/users?user_id={user_id}'
-        response = await self.session.get(url=url)
-        return response
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     async def _get_nickname_exists(self, nickname: str) -> httpx.Response:
         url = f'{self.gateway_url}/api/nicknames?nickname={nickname}'
-        response = await self.session.get(url=url)
-        return response
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     async def _get_user_data(self, user_id: int, target: str) -> httpx.Response:
         """ Запращивает данные о пользователе по опреденному критерию """
         url = f'{self.gateway_url}/api/users?user_id={user_id}&target_field={target}'
-        response = await self.session.get(url=url)
-        return response
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
+
+    async def _get_payment_data(self, user_id: int) -> dict:
+        url = f'{self.gateway_url}/api/payment_data?user_id={user_id}'
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     async def _get_due_to(self, user_id: int) -> httpx.Response:
         url = f'{self.gateway_url}/api/due_to?user_id={user_id}'
-        response = await self.session.get(url=url)
-        return response
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     async def _get_yookassa_link(self, user_id: int):
         url = f'{self.gateway_url}/api/yookassa_link?user_id={user_id}'
@@ -93,8 +108,9 @@ class GatewayService:
             content=user_data.model_dump_json(),
             timeout=10.0
         )
-        resp.raise_for_status()
-        return resp
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     async def _post_activate_subscription(self, user_id: int):
         url = f'{self.gateway_url}/api/toggle_sub'
