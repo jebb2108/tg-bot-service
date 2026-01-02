@@ -107,7 +107,7 @@ async def handle_transaction_offer(callback: CallbackQuery, state: FSMContext):
     users_choice = callback.data.split("_", 1)[1]
 
     if users_choice == 'endselection':
-        if len(data.get("topics", [])):
+        if len(data.get("topics", [])) > 1:
             choices_str = ", ".join([TRANSCRIPTIONS["topics"][topic][lang_code] for topic in data.get("topics")])
             msg = (
                 f"{MESSAGES["you_chose"][lang_code]} {choices_str}\n\n"
@@ -120,6 +120,9 @@ async def handle_transaction_offer(callback: CallbackQuery, state: FSMContext):
             )
 
             return await state.set_state(MultiSelect.end_selection)
+        else:
+            await callback.answer('You must choose at least 2 topics')
+            await state.set_state(MultiSelect.waiting_selection)
 
 
     current_topics = data.get("topics", [])
