@@ -47,13 +47,10 @@ class DataStorage:
 
         gateway = await get_gateway()
         async with gateway:
-            user_data = await gateway.get('user_data', user_id, target='users')
-            profile_data = await gateway.get('user_data', user_id, target='profiles')
-            payment_data = await gateway.get('payment_data', user_id)
+            user_info = await gateway.get('user_data', user_id, target='users')
+            profile_info = await gateway.get('user_data', user_id, target='profiles')
+            payment_info = await gateway.get('payment_data', user_id)
 
-        user_info = user_data.json()
-        profile_info = profile_data.json()
-        payment_info = payment_data.json()
 
         if not user_info:
             return {}
