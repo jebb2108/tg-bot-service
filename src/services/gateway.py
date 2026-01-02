@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 import httpx
+from fastapi import HTTPException
 
 from src.config import config
 from src.logconf import opt_logger as log
@@ -76,8 +77,10 @@ class GatewayService:
 
     async def _get_yookassa_link(self, user_id: int):
         url = f'{self.gateway_url}/api/yookassa_link?user_id={user_id}'
-        response = await self.session.get(url=url)
-        return response
+        resp = await self.session.get(url=url)
+        if resp.status_code == 200:
+            return resp.json()
+        raise HTTPException(status_code=500, detail='Server Internal Error')
 
     # POST функции
     async def _post_add_user(self, user_data: User):
