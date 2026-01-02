@@ -2,7 +2,6 @@ import re
 from typing import Union
 
 import emoji
-from aiohttp import ClientResponse
 
 from src.dependencies import get_gateway
 from src.exc import (
@@ -17,8 +16,8 @@ async def validate_name(nickname: str) -> Union[True, Exception]:
 
     gateway = await get_gateway()
     async with gateway:
-        resp: "ClientResponse" = await gateway.get('nickname_exists', nickname)
-        if resp.json(): raise AlreadyExistsError
+        exists = await gateway.get('nickname_exists', nickname)
+        if exists: raise AlreadyExistsError
 
     if any([ch in emoji.EMOJI_DATA for ch in nickname]): raise EmojiesNotAllowed
     if not 6 <= len(nickname): raise TooShortError

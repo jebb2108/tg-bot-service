@@ -245,10 +245,8 @@ async def cancel_subscription_handler(callback: CallbackQuery, state: FSMContext
     async with gateway:
         await gateway.post('deactivate_subscription', user_id)
 
-    await state.clear()
-
     user_id = callback.from_user.id
-    data = await ds.get_storage_data(user_id, state)
+    data = await ds.get_storage_data(user_id, state, True)
     lang_code = data.get("lang_code")
 
     if await approved(callback):
