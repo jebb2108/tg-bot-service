@@ -50,15 +50,13 @@ async def pay_cmd(message: Message, state: FSMContext, rate_limit_info: RateLimi
     gateway = await get_gateway()
 
     async with gateway:
-        response = await gateway.get('check_user_exists', user_id)
+        exists = await gateway.get('check_user_exists', user_id)
 
-        if response.status_code == 200:
-            response = await gateway.get('yookassa_link', user_id)
-            link = response.json()
-        elif response.status_code == 404:
-            await message.answer("You`re not registered. Press /start to do so")
-            return
+        if exists:
+            link = await gateway.get('yookassa_link', user_id)
+
         else:
+            await message.answer("You`re not registered. Press /start to do so")
             return
 
     logger.debug(
