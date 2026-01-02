@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
@@ -24,14 +22,14 @@ async def subscription_expired_handler(callback: CallbackQuery, state: FSMContex
     user_id = callback.from_user.id
 
     gateway = await get_gateway()
-    async with gateway() as session:
-        link = await session.get('yookassa_link', user_id)
+    async with gateway:
+        link = await gateway.get('yookassa_link', user_id)
 
     try:
         data = await ds.get_storage_data(user_id, state)
         lang_code = data.get("lang_code")
 
-        sent = await callback.message.answer(
+        await callback.message.answer(
             text=MESSAGES['payment_needed'][lang_code],
             reply_markup=get_payment_keyboard(lang_code, link),
             parse_mode=ParseMode.HTML,

@@ -91,7 +91,7 @@ async def handle_language_choice(callback: CallbackQuery, state: FSMContext):
     )
     await callback.message.edit_text(
         text=msg,
-        reply_markup=show_topic_keyboard(lang_code, set()),
+        reply_markup=show_topic_keyboard(lang_code, set()), # noqa
     )
 
     await state.update_data(fluency=users_choice, topics=[])

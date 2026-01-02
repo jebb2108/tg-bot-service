@@ -18,9 +18,6 @@ from src.middlewares.rate_limit_middleware import RateLimitInfo
 from src.translations import MESSAGES
 from src.utils.access_data import data_storage as ds
 
-if TYPE_CHECKING:
-    import httpx
-
 logger = log.setup_logger("main menu commands")
 
 # Инициализируем роутер
