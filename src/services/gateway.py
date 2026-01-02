@@ -87,14 +87,44 @@ class GatewayService:
         url = f'{self.gateway_url}/api/users'
         headers = {"Content-Type": "application/json"}
 
-        response = await self.session.post(
+        resp = await self.session.post(
             url=url,
             headers=headers,
             content=user_data.model_dump_json(),
             timeout=10.0
         )
-        response.raise_for_status()
-        return response
+        resp.raise_for_status()
+        return resp
+
+    async def _post_activate_subscription(self, user_id: int):
+        url = f'{self.gateway_url}/api/toggle_sub'
+        headers = {"Content-Type": "application/json"}
+        data = {'user_id': user_id, 'activate': True}
+        resp = await self.session.post(
+            url=url,
+            headers=headers,
+            json=data,
+            timeout=10.0
+        )
+
+        if resp.status_code == 200: return
+
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
+
+    async def _post_deactivate_subscription(self, user_id: int):
+        url = f'{self.gateway_url}/api/toggle_sub'
+        headers = {"Content-Type": "application/json"}
+        data = {'user_id': user_id, 'activate': False}
+        resp = await self.session.post(
+            url=url,
+            headers=headers,
+            json=data,
+            timeout=10.0
+        )
+
+        if resp.status_code == 200: return
+
+        raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     # PUT функции
     async def _put_update_profile(self, new_data: Union[User, Profile]):
