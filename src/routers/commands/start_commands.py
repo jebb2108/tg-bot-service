@@ -33,10 +33,10 @@ async def start_with_polling(message: Message, state: FSMContext, rate_limit_inf
 
     gateway = await get_gateway()
     async with gateway:
-        response = await gateway.get('check_user_exists', user_id)
+        exists = await gateway.get('check_user_exists', user_id)
 
 
-    if response.json():
+    if exists:
         # если пользователь есть — сразу меню
         return await message.answer(
             text="Press /menu to open menu"

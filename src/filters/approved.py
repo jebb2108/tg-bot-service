@@ -55,5 +55,5 @@ async def approved(callback: Union["CallbackQuery", "Message"], state: FSMContex
             return False
 
     except Exception as e:
-        logger.error(f'Error approving user {user_id}: {e}')
+        logger.warning(f'Error approving user {user_id}: {e}')
         return False
